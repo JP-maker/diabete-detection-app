@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 1. Informations du projet Parent -->
+    <groupId>com.mediscreen</groupId>
+    <artifactId>diabete-detection-app</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <!-- 2. TRÈS IMPORTANT : Le packaging doit être "pom" -->
+    <!-- Cela indique à Maven que ce projet est un agrégateur et non un projet à compiler. -->
+    <packaging>pom</packaging>
+
+    <!-- 3. Notre projet parent hérite lui-même de spring-boot-starter-parent. -->
+    <!-- Cela nous donne accès à une gestion de dépendances et de plugins pré-configurée par Spring. -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.3</version> <!-- Utilisez une version stable de Spring Boot -->
+        <relativePath/>
+    </parent>
+
+    <!-- 4. Définition des modules enfants -->
+    <!-- Maven saura qu'il doit chercher les projets dans ces sous-dossiers. -->
+    <modules>
+        <module>patient-service</module>
+        <!--
+        <module>notes-service</module>
+        <module>report-service</module>
+        <module>gateway-service</module>
+        <module>frontend-ui-service</module>
+        -->
+    </modules>
+
+    <!-- 5. Propriétés communes à tous les modules -->
+    <properties>
+        <java.version>21</java.version>
+        <!-- Centralise la version de Spring Cloud, pour la Gateway -->
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
+    </properties>
+
+    <!-- 6. GESTION CENTRALISÉE DES DÉPENDANCES (la magie opère ici) -->
+    <!-- Ce bloc ne force PAS l'ajout des dépendances aux enfants. -->
+    <!-- Il définit simplement la version à utiliser si un enfant décide de les inclure. -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Importe la "Bill of Materials" (BOM) de Spring Cloud -->
+            <!-- C'est un pom spécial qui gère toutes les versions compatibles de Spring Cloud. -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

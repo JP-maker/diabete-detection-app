@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<!-- 1. Référence vers le projet parent -->
+	<!-- C'est ce qui lie cet enfant au parent. Il hérite de tout ce que nous avons défini plus haut. -->
+	<parent>
+		<groupId>com.mediscreen</groupId>
+		<artifactId>diabete-detection-app</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<!-- 2. Informations spécifiques à ce module -->
+	<artifactId>patient-service</artifactId>
+	<name>Patient Microservice</name>
+	<description>Microservice for managing patient data</description>
+
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>21</java.version>
+	</properties>
+	<!-- 3. Dépendances spécifiques à ce module -->
+	<dependencies>
+		<!-- Dépendance pour créer une API web -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<!-- REMARQUEZ : Pas de <version> ici ! Elle est gérée par le parent. -->
+		</dependency>
+
+		<!-- Dépendance pour la base de données relationnelle -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<!-- Dépendance pour la sécurité -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- Driver PostgreSQL (ou MySQL) -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Lombok pour réduire le code boilerplate -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Dépendances pour les tests -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<!-- 4. Plugin Spring Boot pour créer un jar exécutable -->
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!-- La configuration du plugin est aussi héritée du parent. -->
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
