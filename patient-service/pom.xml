@@ -52,11 +52,10 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
-		<!-- Driver PostgreSQL (ou MySQL) -->
+		<!-- Connecteur pour MySQL -->
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
 		</dependency>
 
 		<!-- Lombok pour réduire le code boilerplate -->
