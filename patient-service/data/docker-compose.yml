@@ -1,0 +1,63 @@
+# Version de la syntaxe Docker Compose. '3.8' est une version moderne et stable.
+version: '3.8'
+
+# Définition des services (conteneurs) à lancer.
+services:
+
+  # 1. Service pour la base de données MySQL du patient-service
+  patient-db:
+    # Utilise l'image officielle de MySQL, version 8.0 pour la stabilité.
+    image: mysql:8.0
+    # Nom du conteneur pour une identification facile (ex: dans Docker Desktop).
+    container_name: patient-db
+    # Politique de redémarrage : le conteneur redémarrera automatiquement sauf s'il est arrêté manuellement.
+    restart: unless-stopped
+    # Variables d'environnement pour configurer MySQL au premier démarrage.
+    environment:
+      MYSQL_DATABASE: diabete_patient_db      # Nom de la base de données à créer.
+      MYSQL_USER: user                        # Nom d'utilisateur pour l'application.
+      MYSQL_PASSWORD: password                # Mot de passe pour cet utilisateur.
+      MYSQL_ROOT_PASSWORD: strong_root_password # Mot de passe pour l'utilisateur 'root' de MySQL.
+    # Mappe le port 3306 du conteneur au port 3306 de la machine hôte.
+    # Utile pour se connecter à la BDD depuis un client local (DBeaver, MySQL Workbench).
+    ports:
+      - "3306:3306"
+    # Monte un volume nommé pour persister les données de la base de données.
+    # CRUCIAL : sans cela, toutes vos données seraient perdues si le conteneur est supprimé.
+    volumes:
+      - patient-db-data:/var/lib/mysql
+    # Connecte ce service au réseau personnalisé 'mediscreen-net'.
+    networks:
+      - mediscreen-net
+
+  # 2. Service pour phpMyAdmin, l'interface web pour gérer la base de données
+  phpmyadmin:
+    # Utilise l'image officielle de phpMyAdmin.
+    image: phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    # Fait en sorte que ce conteneur ne démarre qu'après que 'patient-db' soit prêt.
+    depends_on:
+      - patient-db
+    # Mappe le port 80 du conteneur (serveur web de phpMyAdmin) au port 8088 de la machine hôte.
+    # On utilise 8088 pour ne pas entrer en conflit avec notre gateway sur le port 8080.
+    ports:
+      - "8088:80"
+    # Variables d'environnement pour configurer phpMyAdmin.
+    environment:
+      # Indique à phpMyAdmin l'hôte de la base de données auquel se connecter.
+      # 'patient-db' est le nom du service MySQL défini ci-dessus. C'est la magie des réseaux Docker !
+      PMA_HOST: patient-db
+    # Connecte également ce service au même réseau pour qu'il puisse communiquer avec la BDD.
+    networks:
+      - mediscreen-net
+
+# Définition des volumes nommés. Docker gère leur emplacement sur la machine hôte.
+volumes:
+  patient-db-data:
+
+# Définition des réseaux personnalisés.
+# Un réseau personnalisé permet aux conteneurs de communiquer entre eux en utilisant leur nom de service comme nom d'hôte.
+networks:
+  mediscreen-net:
+    driver: bridge
