@@ -25,12 +25,14 @@
     <!-- Maven saura qu'il doit chercher les projets dans ces sous-dossiers. -->
     <modules>
         <module>patient-service</module>
+        <module>gateway-service</module>
+        <module>frontend-ui-service</module>
         <!--
         <module>notes-service</module>
         <module>report-service</module>
-        <module>gateway-service</module>
-        <module>frontend-ui-service</module>
-        -->
+
+
+    -->
     </modules>
 
     <!-- 5. Propriétés communes à tous les modules -->

@@ -1,0 +1,73 @@
+package com.mediscreen.frontend_ui_service.proxy;
+
+import com.mediscreen.frontend_ui_service.dto.PatientDto;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Proxy qui gère toute la communication avec l'API back-end (via la Gateway).
+ * Il encapsule la logique des appels REST et l'authentification.
+ */
+@Component
+@Slf4j
+public class PatientServiceProxy {
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    // Injection de l'URL de la gateway depuis application.properties
+    @Value("${gateway.url}")
+    private String gatewayUrl;
+
+    /**
+     * Crée les en-têtes HTTP nécessaires pour l'authentification Basic Auth.
+     * @return HttpHeaders avec l'en-tête "Authorization".
+     */
+    private HttpHeaders createAuthHeaders() {
+        String auth = "user:password"; // Les identifiants pour se connecter au back-end
+        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
+        String authHeader = "Basic " + new String(encodedAuth);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", authHeader);
+        return headers;
+    }
+
+    /**
+     * Récupère la liste complète des patients.
+     * @return Une liste de patients, ou une liste vide en cas d'erreur.
+     */
+    public List<PatientDto> getAllPatients() {
+        String url = gatewayUrl + "/patients";
+        log.info("Appel de l'API pour récupérer tous les patients sur l'URL : {}", url);
+
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(createAuthHeaders());
+            // On utilise .exchange() car il permet de spécifier les en-têtes
+            // ParameterizedTypeReference est nécessaire pour que RestTemplate sache
+            // comment désérialiser le JSON en une List<Patient>.
+            ResponseEntity<List<PatientDto>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<>() {}
+            );
+            log.info("Appel API réussi. {} patients reçus.", response.getBody().size());
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            log.error("Erreur API lors de la récupération des patients. Statut : {}, Réponse : {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return Collections.emptyList(); // Renvoyer une liste vide pour ne pas faire planter l'UI
+        }
+    }
+
+    // Ici, vous ajouterez plus tard les méthodes pour getPatientById, addPatient, updatePatient...
+}
