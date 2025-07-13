@@ -92,4 +92,30 @@ public class PatientServiceProxy {
             return null; // Renvoyer null pour indiquer que le patient n'a pas été trouvé
         }
     }
+
+    /**
+     * Met à jour un patient existant en envoyant une requête PUT à l'API.
+     * @param id L'identifiant du patient à mettre à jour.
+     * @param patient L'objet patient contenant les nouvelles informations.
+     */
+    public void updatePatient(Integer id, PatientDto patient) {
+        String url = gatewayUrl + "/patients/" + id;
+        log.info("Appel de l'API pour mettre à jour le patient avec l'id {} sur l'URL : {}", id, url);
+
+        try {
+            // Pour une requête PUT, on a besoin des en-têtes et du corps de la requête (le patient)
+            HttpEntity<PatientDto> requestEntity = new HttpEntity<>(patient, createAuthHeaders());
+
+            restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    Void.class // On ne s'attend à aucune donnée en retour, juste un statut 200 OK.
+            );
+            log.info("Patient {} mis à jour avec succès.", id);
+        } catch (HttpClientErrorException e) {
+            log.error("Erreur API lors de la mise à jour du patient {}. Statut : {}, Réponse : {}", id, e.getStatusCode(), e.getResponseBodyAsString());
+            // Dans une vraie application, on lèverait une exception ici pour informer l'utilisateur.
+        }
+    }
 }

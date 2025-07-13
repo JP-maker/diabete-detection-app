@@ -10,6 +10,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <!-- Affiche le nom et prénom du patient dans le titre -->
                 <h1 th:text="'Détails du Patient: ' + ${patient.prenom} + ' ' + ${patient.nom}">Détails du Patient</h1>
+                <a th:href="@{/patients/{id}/edit(id=${patient.id})}" class="btn btn-warning">Modifier</a>
                 <!-- Lien pour revenir à la liste principale -->
                 <a th:href="@{/patients}" class="btn btn-secondary">Retour à la liste</a>
             </div>
