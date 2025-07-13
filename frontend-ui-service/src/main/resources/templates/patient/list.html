@@ -35,7 +35,7 @@
                     <td th:text="${patient.genre == 'F' ? 'Féminin' : 'Masculin'}"></td>
                     <td>
                         <!-- Liens pour les actions futures -->
-                        <a href="#" class="btn btn-info btn-sm">Détails</a>
+                        <a th:href="@{/patients/{id}(id=${patient.id})}" class="btn btn-info btn-sm">Détails</a>
                     </td>
                 </tr>
                 <!-- Affiche un message si la liste est vide -->

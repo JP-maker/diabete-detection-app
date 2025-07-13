@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -40,5 +41,25 @@ public class UiController {
         // 3. Retourner le nom du template à afficher.
         // Spring va chercher le fichier "src/main/resources/templates/patient/list.html"
         return "patient/list";
+    }
+
+    /**
+     * Gère l'appel pour la vue détail d'un patient.
+     * @param model L'objet Model est utilisé pour passer des données à la vue Thymeleaf.
+     * @return Le nom du fichier HTML (template) à afficher.
+     */
+    @GetMapping("/patients/{id}")
+    public String showPatientDetailPage(Model model, @PathVariable("id") Integer id) {
+        log.info("Requête reçue pour afficher la page de détail d'un patient.");
+        // 1. Appeler le proxy pour obtenir les détails du patient
+        // Notez que l'ID du patient doit être passé en paramètre de la méthode.
+        // Ici, nous n'avons pas encore implémenté la logique pour récupérer l'ID.
+        var patient = patientServiceProxy.getPatientById(id);
+
+        // 2. Ajouter le patient au modèle
+        model.addAttribute("patient", patient);
+
+        // 3. Retourner le nom du template à afficher.
+        return "patient/detail";
     }
 }

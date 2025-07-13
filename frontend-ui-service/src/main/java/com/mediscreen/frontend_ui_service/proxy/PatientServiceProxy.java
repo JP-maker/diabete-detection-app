@@ -69,5 +69,27 @@ public class PatientServiceProxy {
         }
     }
 
-    // Ici, vous ajouterez plus tard les méthodes pour getPatientById, addPatient, updatePatient...
+    /**
+     * Récupère un patient par son ID.
+     * @param id L'ID du patient à récupérer.
+     */
+    public PatientDto getPatientById(Integer id) {
+        String url = gatewayUrl + "/patients/" + id;
+        log.info("Appel de l'API pour récupérer le patient avec ID : {}", id);
+
+        try {
+            HttpEntity<String> entity = new HttpEntity<>(createAuthHeaders());
+            ResponseEntity<PatientDto> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    PatientDto.class
+            );
+            log.info("Appel API réussi. Patient récupéré : {}", response.getBody());
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            log.error("Erreur API lors de la récupération du patient avec ID {}. Statut : {}, Réponse : {}", id, e.getStatusCode(), e.getResponseBodyAsString());
+            return null; // Renvoyer null pour indiquer que le patient n'a pas été trouvé
+        }
+    }
 }
