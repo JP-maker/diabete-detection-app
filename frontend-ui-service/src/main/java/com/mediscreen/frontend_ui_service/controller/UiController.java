@@ -7,7 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+
+import javax.swing.*;
 
 /**
  * Contrôleur pour gérer les requêtes de l'interface utilisateur.
@@ -90,6 +96,7 @@ public class UiController {
     public String processUpdatePatient(@PathVariable("id") Integer id, @ModelAttribute("patient") PatientDto patient) {
         log.info("Requête reçue pour sauvegarder les modifications du patient {}", id);
         patient.setId(id); // S'assurer que l'ID est bien dans l'objet patient
+        log.info("Mise à jour du patient avec date {}", patient.getDateDeNaissance());
         patientServiceProxy.updatePatient(id, patient);
         // On redirige vers la page de détail pour voir les changements et éviter
         // la resoumission du formulaire si l'utilisateur rafraîchit la page.

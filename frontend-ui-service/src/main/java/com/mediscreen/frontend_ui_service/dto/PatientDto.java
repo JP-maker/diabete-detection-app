@@ -1,6 +1,7 @@
 package com.mediscreen.frontend_ui_service.dto;
 
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -13,6 +14,7 @@ public class PatientDto {
     private Integer id;
     private String prenom;
     private String nom;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dateDeNaissance;
     private String genre;
     private String adressePostale;
