@@ -30,8 +30,7 @@ spring:
             # /patients/search?name=Test
             - Path=/patients/**
 
-        # --- Vous ajouterez les autres routes ici dans les prochains sprints ---
-        # - id: notes-service-route
-        #   uri: http://localhost:8082
-        #   predicates:
-        #     - Path=/notes/**
+        - id: notes-service-route
+          uri: http://localhost:8082 # Pointeur vers le port du nouveau service
+          predicates:
+            - Path=/notes/** # Toutes les requêtes /notes/... seront redirigées

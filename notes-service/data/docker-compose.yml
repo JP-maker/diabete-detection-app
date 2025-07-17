@@ -1,0 +1,65 @@
+# Version de la syntaxe Docker Compose
+version: '3.8'
+
+# Définition des services (conteneurs)
+services:
+
+  # 1. Service pour la base de données MongoDB
+  notes-db:
+    # Utilise l'image officielle de MongoDB, version 6.0 pour la compatibilité et les fonctionnalités.
+    image: mongo:6.0
+    # Nom du conteneur pour une identification facile
+    container_name: notes-db
+    # Politique de redémarrage : le conteneur redémarrera automatiquement
+    restart: unless-stopped
+    # Mappe le port 27017 du conteneur au port 27017 de la machine hôte.
+    # C'est ce qui permet à votre application (lancée en local) de s'y connecter via localhost:27017.
+    ports:
+      - "27017:27017"
+    # Variables d'environnement pour créer un utilisateur/mot de passe au premier démarrage.
+    # C'est une bonne pratique, même en développement.
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root      # Utilisateur administrateur
+      MONGO_INITDB_ROOT_PASSWORD: password  # Mot de passe pour cet utilisateur
+    # Monte un volume nommé pour persister les données de la base de données.
+    # CRUCIAL : sans cela, toutes vos données seraient perdues si le conteneur est supprimé.
+    volumes:
+      - mongo-data:/data/db
+    # Connecte ce service à un réseau personnalisé.
+    networks:
+      - mediscreen-net
+
+  # 2. Service pour Mongo Express, l'interface web pour gérer MongoDB
+  mongo-express:
+    # Utilise l'image officielle de Mongo Express.
+    image: mongo-express
+    container_name: mongo-express
+    restart: unless-stopped
+    # Fait en sorte que ce conteneur ne démarre qu'après que 'notes-db' soit prêt.
+    depends_on:
+      - notes-db
+    # Mappe le port 8081 de l'interface web au port 9091 de la machine hôte.
+    # On choisit 9091 pour ne pas entrer en conflit avec les autres services.
+    ports:
+      - "9091:8081"
+    # Variables d'environnement pour configurer Mongo Express.
+    environment:
+      ME_CONFIG_MONGODB_SERVER: notes-db  # Indique à Mongo Express de se connecter au service nommé 'notes-db'.
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: true # Permet de se connecter en tant qu'admin
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root # Doit correspondre à MONGO_INITDB_ROOT_USERNAME
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password # Doit correspondre à MONGO_INITDB_ROOT_PASSWORD
+      ME_CONFIG_BASICAUTH_USERNAME: admin # Utilisateur pour se connecter à l'interface web de Mongo Express
+      ME_CONFIG_BASICAUTH_PASSWORD: password # Mot de passe pour cet utilisateur
+    # Connecte également ce service au même réseau.
+    networks:
+      - mediscreen-net
+
+# Définition des volumes nommés. Docker gère leur emplacement.
+volumes:
+  mongo-data:
+
+# Définition du réseau personnalisé pour la communication entre conteneurs.
+networks:
+  mediscreen-net:
+    driver: bridge

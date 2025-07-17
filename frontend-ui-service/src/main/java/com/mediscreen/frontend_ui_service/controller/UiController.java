@@ -1,7 +1,9 @@
 package com.mediscreen.frontend_ui_service.controller;
 
 
+import com.mediscreen.frontend_ui_service.dto.NoteDTO;
 import com.mediscreen.frontend_ui_service.dto.PatientDto;
+import com.mediscreen.frontend_ui_service.proxy.NotesServiceProxy;
 import com.mediscreen.frontend_ui_service.proxy.PatientServiceProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 
 import javax.swing.*;
+import java.util.List;
 
 /**
  * Contrôleur pour gérer les requêtes de l'interface utilisateur.
@@ -26,6 +29,9 @@ public class UiController {
 
     @Autowired
     private PatientServiceProxy patientServiceProxy;
+
+    @Autowired
+    private NotesServiceProxy notesServiceProxy;
 
     /**
      * Gère les requêtes vers la page d'accueil de la gestion des patients.
@@ -49,22 +55,23 @@ public class UiController {
     }
 
     /**
-     * Gère l'appel pour la vue détail d'un patient.
-     * @param model L'objet Model est utilisé pour passer des données à la vue Thymeleaf.
-     * @return Le nom du fichier HTML (template) à afficher.
+     * Affiche la page de détail d'un patient spécifique, y compris ses notes.
+     * Cette méthode est appelée lorsque l'utilisateur accède à l'URL /patients/{id}.
+     * @param id
+     * @param model
+     * @return
      */
     @GetMapping("/patients/{id}")
-    public String showPatientDetailPage(Model model, @PathVariable("id") Integer id) {
-        log.info("Requête reçue pour afficher la page de détail d'un patient.");
-        // 1. Appeler le proxy pour obtenir les détails du patient
-        // Notez que l'ID du patient doit être passé en paramètre de la méthode.
-        // Ici, nous n'avons pas encore implémenté la logique pour récupérer l'ID.
-        var patient = patientServiceProxy.getPatientById(id);
+    public String showPatientDetailPage(@PathVariable("id") Integer id, Model model) {
+        log.info("Requête pour afficher les détails du patient {}", id);
+        PatientDto patient = patientServiceProxy.getPatientById(id);
 
-        // 2. Ajouter le patient au modèle
+        // AJOUT : Récupérer les notes du patient
+        List<NoteDTO> notes = notesServiceProxy.getNotesByPatientId(id);
+
         model.addAttribute("patient", patient);
-
-        // 3. Retourner le nom du template à afficher.
+        model.addAttribute("notes", notes); // Ajouter les notes au modèle
+        model.addAttribute("newNote", new NoteDTO()); // Ajouter un DTO vide pour le formulaire d'ajout
         return "patient/detail";
     }
 
@@ -100,6 +107,22 @@ public class UiController {
         patientServiceProxy.updatePatient(id, patient);
         // On redirige vers la page de détail pour voir les changements et éviter
         // la resoumission du formulaire si l'utilisateur rafraîchit la page.
+        return "redirect:/patients/" + id;
+    }
+
+
+
+    /**
+     * Traite la soumission du formulaire pour ajouter une nouvelle note à un patient.
+     * @param id L'identifiant du patient auquel la note est ajoutée.
+     * @param newNote L'objet NoteDTO contenant les données de la nouvelle note.
+     * @return Une redirection vers la page de détail du patient après l'ajout de la note.
+     */
+    @PostMapping("/patients/{id}/notes/add")
+    public String processAddNote(@PathVariable("id") Integer id, @ModelAttribute NoteDTO newNote) {
+        log.info("Requête pour ajouter une note au patient {}", id);
+        newNote.setPatientId(id); // S'assurer que l'ID du patient est bien défini
+        notesServiceProxy.addNote(newNote);
         return "redirect:/patients/" + id;
     }
 }

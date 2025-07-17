@@ -37,6 +37,36 @@
                     </div>
                 </div>
             </div>
+            <div class="mt-5">
+                <h2>Historique des notes du praticien</h2>
+
+                <!-- Affiche ce message si aucune note n'existe -->
+                <div th:if="${#lists.isEmpty(notes)}" class="alert alert-info mt-3">
+                    Aucune note d'historique pour ce patient.
+                </div>
+
+                <!-- Boucle sur les notes si la liste n'est pas vide -->
+                <div th:unless="${#lists.isEmpty(notes)}" class="mt-3">
+                    <div class="card mb-3" th:each="note : ${notes}">
+                        <div class="card-header" th:text="'Note du ' + ${#temporals.format(note.date, 'dd MMMM yyyy HH:mm')}"></div>
+                        <div class="card-body">
+                            <!-- 'pre' conserve le formatage (sauts de ligne) -->
+                            <pre class="card-text" th:text="${note.note}"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5">
+                <h2>Ajouter une nouvelle note</h2>
+                <form th:action="@{/patients/{id}/notes/add(id=${patient.id})}" th:object="${newNote}" method="post" class="mt-3">
+                    <div class="mb-3">
+                        <label for="note-content" class="form-label">Note du praticien</label>
+                        <textarea class="form-control" id="note-content" th:field="*{note}" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ajouter la note</button>
+                </form>
+            </div>
         </div>
     </body>
 </html>

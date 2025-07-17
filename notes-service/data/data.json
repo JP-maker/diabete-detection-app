@@ -1,0 +1,4 @@
+{"_id":{"$oid":"68791e8630402e8bf95e5b80"},"patientId":1,"date":"2024-12-01T10:00:00.000Z","note":"Le patient déclare qu'il se sent très bien. Poids égal ou inférieur au poids recommandé"}
+{"_id":{"$oid":"68791e9630402e8bf95e5b82"},"patientId":2,"date":"2024-12-02T11:00:00.000Z","note":"Le patient déclare qu'il ressent beaucoup de stress au travail. Il se plaint également que son audition est anormale dernièrement. Fumeur. Hémoglobine A1C, Microalbumine"}
+{"_id":{"$oid":"68791e9f30402e8bf95e5b84"},"patientId":3,"date":"2024-12-03T14:30:00.000Z","note":"Le patient déclare avoir eu une réaction aux médicaments au cours des 3 derniers mois. Il remarque également que son audition continue d'être anormale."}
+{"_id":{"$oid":"68791ea830402e8bf95e5b86"},"patientId":4,"date":"2024-12-04T16:00:00.000Z","note":"Le patient déclare qu'il est fumeur et qu'il a eu des vertiges au cours des deux dernières semaines, ainsi que des réactions cutanées."}
