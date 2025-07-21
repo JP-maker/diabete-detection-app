@@ -26,9 +26,11 @@ public class NoteService {
 
     public NoteDTO addNote(NoteDTO noteDTO) {
         log.info("Ajout d'une nouvelle note pour le patient ID : {}", noteDTO.getPatientId());
+        noteDTO.setId(null);
         noteDTO.setDate(LocalDateTime.now()); // On s'assure que la date est celle du moment de l'ajout
         var noteToSave = noteMapper.toEntity(noteDTO);
         var savedNote = noteRepository.save(noteToSave);
+        log.info("Note créée avec succès avec l'ID : {}", savedNote.getId());
         return noteMapper.toDto(savedNote);
     }
 }
