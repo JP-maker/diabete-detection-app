@@ -5,10 +5,12 @@ import com.mediscreen.frontend_ui_service.dto.NoteDTO;
 import com.mediscreen.frontend_ui_service.dto.PatientDto;
 import com.mediscreen.frontend_ui_service.proxy.NotesServiceProxy;
 import com.mediscreen.frontend_ui_service.proxy.PatientServiceProxy;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -76,6 +78,47 @@ public class UiController {
     }
 
     /**
+     * Affiche le formulaire de création pour un nouveau patient.
+     *
+     * @param model Le modèle pour passer un objet patient vide à la vue.
+     * @return Le nom de la vue du formulaire de création.
+     */
+    @GetMapping("/patients/add")
+    public String showAddForm(Model model) {
+        log.info("Requête reçue pour afficher le formulaire de création de patient.");
+        // On passe un objet DTO vide pour que le formulaire puisse s'y lier.
+        model.addAttribute("patient", new PatientDto());
+        return "patient/add"; // Pointeur vers la nouvelle vue add.html
+    }
+
+    /**
+     * Traite la soumission du formulaire de création d'un patient.
+     *
+     * @param patient Le DTO du patient rempli avec les données du formulaire.
+     * @param result Contient les résultats de la validation.
+     * @param model Le modèle pour renvoyer des données à la vue en cas d'erreur.
+     * @return Une redirection vers la liste des patients si la création réussit,
+     *         ou retourne à la page du formulaire en cas d'erreur de validation.
+     */
+    @PostMapping("/patients/save")
+    public String processAddPatient(@Valid @ModelAttribute("patient") PatientDto patient, BindingResult result, Model model) {
+        log.info("Requête reçue pour sauvegarder un nouveau patient.");
+
+        if (result.hasErrors()) {
+            log.error("Erreurs de validation trouvées : {}", result.getAllErrors());
+            // Si des erreurs de validation sont présentes, on retourne à la page du formulaire
+            // pour les afficher. Thymeleaf se chargera d'afficher les messages d'erreur.
+            return "patient/add";
+        }
+
+        patientServiceProxy.addPatient(patient);
+        log.info("Patient {} {} créé avec succès.", patient.getPrenom(), patient.getNom());
+
+        // On redirige vers la liste des patients pour voir le nouveau patient ajouté.
+        return "redirect:/patients";
+    }
+
+    /**
      * Affiche le formulaire d'édition pour un patient donné.
      * Récupère les données du patient et les passe à la vue pour pré-remplir le formulaire.
      *
@@ -100,13 +143,21 @@ public class UiController {
      * @return Une redirection vers la page de détail du patient mis à jour.
      */
     @PostMapping("/patients/update/{id}")
-    public String processUpdatePatient(@PathVariable("id") Integer id, @ModelAttribute("patient") PatientDto patient) {
+    public String processUpdatePatient(@PathVariable("id") Integer id,
+                                       @ModelAttribute("patient") PatientDto patient,
+                                       BindingResult result, Model model) {
         log.info("Requête reçue pour sauvegarder les modifications du patient {}", id);
-        patient.setId(id); // S'assurer que l'ID est bien dans l'objet patient
-        log.info("Mise à jour du patient avec date {}", patient.getDateDeNaissance());
+
+        if (result.hasErrors()) {
+            log.error("Erreurs de validation trouvées pour la mise à jour : {}", result.getAllErrors());
+            // Il faut s'assurer que l'ID est toujours dans l'objet pour que les liens du formulaire fonctionnent
+            patient.setId(id);
+            // On retourne à la vue d'édition pour afficher les erreurs.
+            return "patient/edit";
+        }
+
         patientServiceProxy.updatePatient(id, patient);
-        // On redirige vers la page de détail pour voir les changements et éviter
-        // la resoumission du formulaire si l'utilisateur rafraîchit la page.
+        log.info("Validation réussie. Patient {} mis à jour.", id);
         return "redirect:/patients/" + id;
     }
 

@@ -118,4 +118,33 @@ public class PatientServiceProxy {
             // Dans une vraie application, on lèverait une exception ici pour informer l'utilisateur.
         }
     }
+
+    /**
+     * Crée un nouveau patient en envoyant une requête POST à l'API.
+     * @param patientDTO Le DTO du patient à créer.
+     * @return Le DTO du patient sauvegardé, incluant son nouvel ID.
+     */
+    public PatientDto addPatient(PatientDto patientDTO) {
+        String url = gatewayUrl + "/patients";
+        log.info("Appel de l'API pour créer un nouveau patient sur l'URL : {}", url);
+
+        try {
+            // Pour une requête POST, on envoie le DTO dans le corps de la requête.
+            HttpEntity<PatientDto> requestEntity = new HttpEntity<>(patientDTO, createAuthHeaders());
+
+            // postForEntity envoie la requête et attend un DTO en retour.
+            ResponseEntity<PatientDto> response = restTemplate.postForEntity(
+                    url,
+                    requestEntity,
+                    PatientDto.class
+            );
+
+            log.info("Patient créé avec succès avec l'ID : {}", response.getBody().getId());
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            log.error("Erreur API lors de la création du patient. Statut : {}, Réponse : {}", e.getStatusCode(), e.getResponseBodyAsString());
+            // Retourner null ou lever une exception pour que le contrôleur puisse la gérer.
+            return null;
+        }
+    }
 }
