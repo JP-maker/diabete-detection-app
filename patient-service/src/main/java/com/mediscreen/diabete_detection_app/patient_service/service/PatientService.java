@@ -1,7 +1,7 @@
 package com.mediscreen.diabete_detection_app.patient_service.service;
 
 
-import com.mediscreen.diabete_detection_app.patient_service.dto.PatientDto;
+import com.mediscreen.diabete_detection_app.patient_service.dto.PatientDTO;
 import com.mediscreen.diabete_detection_app.patient_service.exception.PatientNotFoundException;
 import com.mediscreen.diabete_detection_app.patient_service.mapper.PatientMapper;
 import com.mediscreen.diabete_detection_app.patient_service.model.Patient;
@@ -23,13 +23,13 @@ public class PatientService {
     @Autowired
     private PatientMapper patientMapper;
 
-    public List<PatientDto> getAllPatients() {
+    public List<PatientDTO> getAllPatients() {
         return patientRepository.findAll().stream()
                 .map(patientMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public PatientDto addPatient(PatientDto patientDTO) {
+    public PatientDTO addPatient(PatientDTO patientDTO) {
         log.info("Création d'un nouveau patient");
         // L'ID est null pour une création, Hibernate/JPA le générera.
         patientDTO.setId(null);
@@ -39,13 +39,13 @@ public class PatientService {
         return patientMapper.toDto(savedPatient);
     }
 
-    public PatientDto getPatientById(Integer id) {
+    public PatientDTO getPatientById(Integer id) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new PatientNotFoundException("Patient non trouvé avec l'id : " + id));
         return patientMapper.toDto(patient);
     }
 
-    public PatientDto updatePatient(Integer id, PatientDto patientDTO) {
+    public PatientDTO updatePatient(Integer id, PatientDTO patientDTO) {
         log.info("Mise à jour du patient {}", id);
         // Vérifier si le patient existe
         if (!patientRepository.existsById(id)) {

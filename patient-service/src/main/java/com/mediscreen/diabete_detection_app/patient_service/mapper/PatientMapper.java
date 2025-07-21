@@ -1,7 +1,7 @@
 package com.mediscreen.diabete_detection_app.patient_service.mapper;
 
 
-import com.mediscreen.diabete_detection_app.patient_service.dto.PatientDto;
+import com.mediscreen.diabete_detection_app.patient_service.dto.PatientDTO;
 import com.mediscreen.diabete_detection_app.patient_service.model.Patient;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -23,7 +23,7 @@ public interface PatientMapper {
      * @param patient L'entité source.
      * @return Le DTO résultant.
      */
-    PatientDto toDto(Patient patient);
+    PatientDTO toDto(Patient patient);
 
     /**
      * Convertit un PatientDTO en une entité Patient.
@@ -31,5 +31,5 @@ public interface PatientMapper {
      * @param patientDto Le DTO source.
      * @return L'entité résultante.
      */
-    Patient toEntity(PatientDto patientDto);
+    Patient toEntity(PatientDTO patientDto);
 }

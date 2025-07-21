@@ -1,4 +1,4 @@
-package com.mediscreen.diabete_detection_app.patient_service.dto;
+package com.mediscreen.report_service.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
@@ -13,7 +13,7 @@ import java.time.LocalDate;
  * Contient des annotations de validation pour assurer l'intégrité des données.
  */
 @Data
-public class PatientDto {
+public class PatientDTO {
 
     private Integer id;
 

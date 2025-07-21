@@ -5,6 +5,7 @@ import com.mediscreen.frontend_ui_service.dto.NoteDTO;
 import com.mediscreen.frontend_ui_service.dto.PatientDto;
 import com.mediscreen.frontend_ui_service.proxy.NotesServiceProxy;
 import com.mediscreen.frontend_ui_service.proxy.PatientServiceProxy;
+import com.mediscreen.frontend_ui_service.proxy.ReportServiceProxy;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class UiController {
     @Autowired
     private NotesServiceProxy notesServiceProxy;
 
+    @Autowired
+    private ReportServiceProxy reportServiceProxy;
+
     /**
      * Gère les requêtes vers la page d'accueil de la gestion des patients.
      *
@@ -57,11 +61,11 @@ public class UiController {
     }
 
     /**
-     * Affiche la page de détail d'un patient spécifique, y compris ses notes.
+     * Affiche la page de détail d'un patient, y compris ses notes et le rapport de diabète.
      * Cette méthode est appelée lorsque l'utilisateur accède à l'URL /patients/{id}.
-     * @param id
-     * @param model
-     * @return
+     * @param id L'identifiant du patient.
+     * @param model Le modèle pour passer les données à la vue.
+     * @return Le nom de la vue de détail du patient.
      */
     @GetMapping("/patients/{id}")
     public String showPatientDetailPage(@PathVariable("id") Integer id, Model model) {
@@ -71,9 +75,12 @@ public class UiController {
         // AJOUT : Récupérer les notes du patient
         List<NoteDTO> notes = notesServiceProxy.getNotesByPatientId(id);
 
+        String diabetesReport = reportServiceProxy.getDiabetesReport(id);
+
         model.addAttribute("patient", patient);
         model.addAttribute("notes", notes); // Ajouter les notes au modèle
         model.addAttribute("newNote", new NoteDTO()); // Ajouter un DTO vide pour le formulaire d'ajout
+        model.addAttribute("diabetesReport", diabetesReport); // Ajouter le rapport au modèle
         return "patient/detail";
     }
 

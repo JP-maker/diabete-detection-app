@@ -28,12 +28,7 @@
         <module>gateway-service</module>
         <module>frontend-ui-service</module>
         <module>notes-service</module>
-        <!--
-
         <module>report-service</module>
-
-
-    -->
     </modules>
 
     <!-- 5. Propriétés communes à tous les modules -->

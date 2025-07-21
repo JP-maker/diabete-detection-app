@@ -1,7 +1,7 @@
 package com.mediscreen.diabete_detection_app.patient_service.controller;
 
 
-import com.mediscreen.diabete_detection_app.patient_service.dto.PatientDto;
+import com.mediscreen.diabete_detection_app.patient_service.dto.PatientDTO;
 import com.mediscreen.diabete_detection_app.patient_service.exception.PatientNotFoundException;
 import com.mediscreen.diabete_detection_app.patient_service.model.Patient;
 import com.mediscreen.diabete_detection_app.patient_service.repository.PatientRepository;
@@ -51,13 +51,13 @@ public class PatientController {
      * Récupère un patient spécifique par son identifiant unique.
      *
      * @param id L'identifiant du patient à récupérer.
-     * @return Une {@link ResponseEntity} contenant le {@link PatientDto} trouvé et un statut HTTP 200 (OK).
+     * @return Une {@link ResponseEntity} contenant le {@link PatientDTO} trouvé et un statut HTTP 200 (OK).
      * @throws PatientNotFoundException si aucun patient ne correspond à l'ID, résultant en un statut 404.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<PatientDto> getPatientById(@PathVariable("id") Integer id) {
+    public ResponseEntity<PatientDTO> getPatientById(@PathVariable("id") Integer id) {
         log.info("Requête reçue pour récupérer le patient avec l'ID : {}", id);
-        PatientDto patient = patientService.getPatientById(id);
+        PatientDTO patient = patientService.getPatientById(id);
         log.info("Patient avec l'ID {} trouvé avec succès.", id);
         return ResponseEntity.ok(patient);
     }
@@ -67,12 +67,12 @@ public class PatientController {
      * Les données du patient sont validées avant la création.
      *
      * @param patientDTO Le DTO contenant les informations du patient à créer. Doit être valide.
-     * @return Une {@link ResponseEntity} contenant le {@link PatientDto} créé (avec son nouvel ID) et un statut HTTP 201 (Created).
+     * @return Une {@link ResponseEntity} contenant le {@link PatientDTO} créé (avec son nouvel ID) et un statut HTTP 201 (Created).
      */
     @PostMapping
-    public ResponseEntity<PatientDto> addPatient(@Valid @RequestBody PatientDto patientDTO) {
+    public ResponseEntity<PatientDTO> addPatient(@Valid @RequestBody PatientDTO patientDTO) {
         log.info("Requête reçue pour créer un nouveau patient pour : {} {}", patientDTO.getPrenom(), patientDTO.getNom());
-        PatientDto savedPatient = patientService.addPatient(patientDTO);
+        PatientDTO savedPatient = patientService.addPatient(patientDTO);
         log.info("Patient créé avec succès avec l'ID : {}", savedPatient.getId());
         return new ResponseEntity<>(savedPatient, HttpStatus.CREATED);
     }
@@ -83,13 +83,13 @@ public class PatientController {
      *
      * @param id L'identifiant du patient à mettre à jour.
      * @param patientDTO Le DTO contenant les nouvelles informations pour le patient.
-     * @return Une {@link ResponseEntity} contenant le {@link PatientDto} mis à jour et un statut HTTP 200 (OK).
+     * @return Une {@link ResponseEntity} contenant le {@link PatientDTO} mis à jour et un statut HTTP 200 (OK).
      * @throws PatientNotFoundException si aucun patient ne correspond à l'ID, résultant en un statut 404.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<PatientDto> updatePatient(@PathVariable("id") Integer id, @Valid @RequestBody PatientDto patientDTO) {
+    public ResponseEntity<PatientDTO> updatePatient(@PathVariable("id") Integer id, @Valid @RequestBody PatientDTO patientDTO) {
         log.info("Requête reçue pour mettre à jour le patient avec l'ID : {}", id);
-        PatientDto updatedPatient = patientService.updatePatient(id, patientDTO);
+        PatientDTO updatedPatient = patientService.updatePatient(id, patientDTO);
         log.info("Patient avec l'ID {} mis à jour avec succès.", id);
         return ResponseEntity.ok(updatedPatient);
     }
