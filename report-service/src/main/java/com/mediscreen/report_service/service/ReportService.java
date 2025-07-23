@@ -22,7 +22,7 @@ public class ReportService {
     // Définition des termes déclencheurs
     private static final List<String> TRIGGERS = Arrays.asList(
             "Hémoglobine A1C", "Microalbumine", "Taille", "Poids", "Fumeur", "Fumeuse",
-            "Anormal", "Cholestérol", "Vertiges", "Rechute", "Réaction", "Anticorps"
+            "Anormal", "Anormale", "Cholestérol", "Vertiges", "Rechute", "Réaction", "Anticorps"
     );
 
     public ReportService(PatientServiceProxy patientProxy, NotesServiceProxy notesProxy) {
@@ -70,6 +70,7 @@ public class ReportService {
      * @return Le nombre de déclencheurs trouvés.
      */
     private long countTriggersInNotes(List<NoteDTO> notes) {
+        log.info("Comptage des déclencheurs dans les notes du patient");
         if (notes == null || notes.isEmpty()) {
             return 0;
         }
@@ -79,6 +80,9 @@ public class ReportService {
                 .collect(Collectors.joining(" ")); // Concatène toutes les notes en une seule chaîne de caractères
 
         // On compte les occurrences uniques, insensible à la casse
+        log.info("Nombre de déclencheurs trouvés dans les notes : {}", TRIGGERS.stream()
+                .filter(trigger -> allNotesText.toLowerCase().contains(trigger.toLowerCase()))
+                .count());
         return TRIGGERS.stream()
                 .filter(trigger -> allNotesText.toLowerCase().contains(trigger.toLowerCase()))
                 .count();
@@ -95,18 +99,24 @@ public class ReportService {
         boolean isMale = "M".equalsIgnoreCase(patient.getGenre());
 
         if (triggerCount == 0) return "Aucun risque";
-
-        if (age > 30) {
+        if (age >= 30) {
+            // Le dossier du patient contient entre deux et cinq déclencheurs et le patient est âgé de plus de 30 ans
             if (triggerCount >= 2 && triggerCount <= 5) return "Risque limité";
-            if (triggerCount >= 6 && triggerCount <= 7) return "Danger";
+            //  Si le patient a plus de 30 ans, alors il en faudra six ou sept ;
+            if (triggerCount == 6 || triggerCount == 7) return "Danger";
+            //  Si le patient a plus de 30 ans, alors il en faudra huit ou plus
             if (triggerCount >= 8) return "Apparition précoce";
-        } else { // Moins de 30 ans
+        } else { // moins de 30 ans
             if (isMale) {
+                // Si le patient est un homme de moins de 30 ans, alors trois termes déclencheurs doivent être présents
+                if (triggerCount == 3) return "Danger";
+                //Si le patient est un homme de moins de 30 ans, alors au moins cinq termes déclencheurs
                 if (triggerCount >= 5) return "Apparition précoce";
-                if (triggerCount >= 3) return "Danger";
-            } else { // Femme
+            } else {
+                // Si le patient est une femme et a moins de 30 ans, il faudra quatre termes déclencheurs
+                if (triggerCount == 4) return "Danger";
+                //  Si le patient est une femme et a moins de 30 ans, il faudra au moins sept termes déclencheurs
                 if (triggerCount >= 7) return "Apparition précoce";
-                if (triggerCount >= 4) return "Danger";
             }
         }
 
