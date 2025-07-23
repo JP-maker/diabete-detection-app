@@ -1,6 +1,6 @@
 package com.mediscreen.frontend_ui_service.proxy;
 
-import com.mediscreen.frontend_ui_service.dto.PatientDto;
+import com.mediscreen.frontend_ui_service.dto.PatientDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -46,7 +46,7 @@ public class PatientServiceProxy {
      * Récupère la liste complète des patients.
      * @return Une liste de patients, ou une liste vide en cas d'erreur.
      */
-    public List<PatientDto> getAllPatients() {
+    public List<PatientDTO> getAllPatients() {
         String url = gatewayUrl + "/patients";
         log.info("Appel de l'API pour récupérer tous les patients sur l'URL : {}", url);
 
@@ -55,7 +55,7 @@ public class PatientServiceProxy {
             // On utilise .exchange() car il permet de spécifier les en-têtes
             // ParameterizedTypeReference est nécessaire pour que RestTemplate sache
             // comment désérialiser le JSON en une List<Patient>.
-            ResponseEntity<List<PatientDto>> response = restTemplate.exchange(
+            ResponseEntity<List<PatientDTO>> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     entity,
@@ -73,17 +73,17 @@ public class PatientServiceProxy {
      * Récupère un patient par son ID.
      * @param id L'ID du patient à récupérer.
      */
-    public PatientDto getPatientById(Integer id) {
+    public PatientDTO getPatientById(Integer id) {
         String url = gatewayUrl + "/patients/" + id;
         log.info("Appel de l'API pour récupérer le patient avec ID : {}", id);
 
         try {
             HttpEntity<String> entity = new HttpEntity<>(createAuthHeaders());
-            ResponseEntity<PatientDto> response = restTemplate.exchange(
+            ResponseEntity<PatientDTO> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     entity,
-                    PatientDto.class
+                    PatientDTO.class
             );
             log.info("Appel API réussi. Patient récupéré : {}", response.getBody());
             return response.getBody();
@@ -98,13 +98,13 @@ public class PatientServiceProxy {
      * @param id L'identifiant du patient à mettre à jour.
      * @param patient L'objet patient contenant les nouvelles informations.
      */
-    public void updatePatient(Integer id, PatientDto patient) {
+    public void updatePatient(Integer id, PatientDTO patient) {
         String url = gatewayUrl + "/patients/" + id;
         log.info("Appel de l'API pour mettre à jour le patient avec l'id {} sur l'URL : {}", id, url);
 
         try {
             // Pour une requête PUT, on a besoin des en-têtes et du corps de la requête (le patient)
-            HttpEntity<PatientDto> requestEntity = new HttpEntity<>(patient, createAuthHeaders());
+            HttpEntity<PatientDTO> requestEntity = new HttpEntity<>(patient, createAuthHeaders());
 
             restTemplate.exchange(
                     url,
@@ -124,19 +124,19 @@ public class PatientServiceProxy {
      * @param patientDTO Le DTO du patient à créer.
      * @return Le DTO du patient sauvegardé, incluant son nouvel ID.
      */
-    public PatientDto addPatient(PatientDto patientDTO) {
+    public PatientDTO addPatient(PatientDTO patientDTO) {
         String url = gatewayUrl + "/patients";
         log.info("Appel de l'API pour créer un nouveau patient sur l'URL : {}", url);
 
         try {
             // Pour une requête POST, on envoie le DTO dans le corps de la requête.
-            HttpEntity<PatientDto> requestEntity = new HttpEntity<>(patientDTO, createAuthHeaders());
+            HttpEntity<PatientDTO> requestEntity = new HttpEntity<>(patientDTO, createAuthHeaders());
 
             // postForEntity envoie la requête et attend un DTO en retour.
-            ResponseEntity<PatientDto> response = restTemplate.postForEntity(
+            ResponseEntity<PatientDTO> response = restTemplate.postForEntity(
                     url,
                     requestEntity,
-                    PatientDto.class
+                    PatientDTO.class
             );
 
             log.info("Patient créé avec succès avec l'ID : {}", response.getBody().getId());

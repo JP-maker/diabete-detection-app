@@ -9,6 +9,7 @@ import com.mediscreen.diabete_detection_app.patient_service.repository.PatientRe
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,15 +46,26 @@ public class PatientService {
         return patientMapper.toDto(patient);
     }
 
+    @Transactional
     public PatientDTO updatePatient(Integer id, PatientDTO patientDTO) {
         log.info("Mise à jour du patient {}", id);
-        // Vérifier si le patient existe
-        if (!patientRepository.existsById(id)) {
-            throw new PatientNotFoundException("Impossible de mettre à jour. Patient non trouvé avec l'id : " + id);
-        }
-        Patient patientToUpdate = patientMapper.toEntity(patientDTO);
-        patientToUpdate.setId(id); // Forcer l'ID pour être sûr de faire un update
+        // 1. Charger l'entité existante. Si elle n'existe pas, lève une exception.
+        Patient patientToUpdate = patientRepository.findById(id)
+                .orElseThrow(() -> new PatientNotFoundException("Impossible de mettre à jour. Patient non trouvé avec l'id : " + id));
+
+        // 2. Mettre à jour les champs de l'entité gérée avec les valeurs du DTO.
+        // PAS DE patientMapper.toEntity() ICI !
+        patientToUpdate.setPrenom(patientDTO.getPrenom());
+        patientToUpdate.setNom(patientDTO.getNom());
+        patientToUpdate.setDateDeNaissance(patientDTO.getDateDeNaissance());
+        patientToUpdate.setGenre(patientDTO.getGenre());
+        patientToUpdate.setAdressePostale(patientDTO.getAdressePostale());
+        patientToUpdate.setNumeroDeTelephone(patientDTO.getNumeroDeTelephone());
+
+        // 3. Sauvegarder l'entité mise à jour.
         Patient updatedPatient = patientRepository.save(patientToUpdate);
+
+        // 4. Retourner le DTO correspondant.
         return patientMapper.toDto(updatedPatient);
     }
 

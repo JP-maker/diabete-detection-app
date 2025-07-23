@@ -39,9 +39,9 @@ public class PatientController {
      * @return une liste de tous les patients et un statut HTTP 200 OK.
      */
     @GetMapping
-    public ResponseEntity<List<Patient>> getAllPatients() {
+    public ResponseEntity<List<PatientDTO>> getAllPatients() {
         log.info("Récupération de la liste de tous les patients");
-        List<Patient> patients = patientRepository.findAll();
+        List<PatientDTO> patients = patientService.getAllPatients();
         log.info("Nombre de patients trouvés : {}", patients.size());
         return ResponseEntity.ok(patients);
 

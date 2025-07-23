@@ -2,7 +2,7 @@ package com.mediscreen.frontend_ui_service.controller;
 
 
 import com.mediscreen.frontend_ui_service.dto.NoteDTO;
-import com.mediscreen.frontend_ui_service.dto.PatientDto;
+import com.mediscreen.frontend_ui_service.dto.PatientDTO;
 import com.mediscreen.frontend_ui_service.proxy.NotesServiceProxy;
 import com.mediscreen.frontend_ui_service.proxy.PatientServiceProxy;
 import com.mediscreen.frontend_ui_service.proxy.ReportServiceProxy;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 
-import javax.swing.*;
 import java.util.List;
 
 /**
@@ -70,7 +69,7 @@ public class UiController {
     @GetMapping("/patients/{id}")
     public String showPatientDetailPage(@PathVariable("id") Integer id, Model model) {
         log.info("Requête pour afficher les détails du patient {}", id);
-        PatientDto patient = patientServiceProxy.getPatientById(id);
+        PatientDTO patient = patientServiceProxy.getPatientById(id);
 
         // AJOUT : Récupérer les notes du patient
         List<NoteDTO> notes = notesServiceProxy.getNotesByPatientId(id);
@@ -94,7 +93,7 @@ public class UiController {
     public String showAddForm(Model model) {
         log.info("Requête reçue pour afficher le formulaire de création de patient.");
         // On passe un objet DTO vide pour que le formulaire puisse s'y lier.
-        model.addAttribute("patient", new PatientDto());
+        model.addAttribute("patient", new PatientDTO());
         return "patient/add"; // Pointeur vers la nouvelle vue add.html
     }
 
@@ -108,7 +107,7 @@ public class UiController {
      *         ou retourne à la page du formulaire en cas d'erreur de validation.
      */
     @PostMapping("/patients/save")
-    public String processAddPatient(@Valid @ModelAttribute("patient") PatientDto patient, BindingResult result, Model model) {
+    public String processAddPatient(@Valid @ModelAttribute("patient") PatientDTO patient, BindingResult result, Model model) {
         log.info("Requête reçue pour sauvegarder un nouveau patient.");
 
         if (result.hasErrors()) {
@@ -136,7 +135,7 @@ public class UiController {
     @GetMapping("/patients/{id}/edit")
     public String showEditForm(@PathVariable("id") Integer id, Model model) {
         log.info("Requête reçue pour afficher le formulaire d'édition du patient {}", id);
-        PatientDto patient = patientServiceProxy.getPatientById(id);
+        PatientDTO patient = patientServiceProxy.getPatientById(id);
         model.addAttribute("patient", patient);
         return "patient/edit"; // Pointeur vers la nouvelle vue edit.html
     }
@@ -151,7 +150,7 @@ public class UiController {
      */
     @PostMapping("/patients/update/{id}")
     public String processUpdatePatient(@PathVariable("id") Integer id,
-                                       @ModelAttribute("patient") PatientDto patient,
+                                       @ModelAttribute("patient") PatientDTO patient,
                                        BindingResult result, Model model) {
         log.info("Requête reçue pour sauvegarder les modifications du patient {}", id);
 
