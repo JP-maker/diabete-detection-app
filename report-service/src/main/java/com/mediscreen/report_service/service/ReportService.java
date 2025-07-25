@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,10 +21,26 @@ public class ReportService {
     private final NotesServiceProxy notesProxy;
 
     // Définition des termes déclencheurs
-    private static final List<String> TRIGGERS = Arrays.asList(
-            "Hémoglobine A1C", "Microalbumine", "Taille", "Poids", "Fumeur", "Fumeuse",
-            "Anormal", "Anormale", "Cholestérol", "Vertiges", "Rechute", "Réaction", "Anticorps"
+    private static final List<String> TRIGGER_PATTERNS = Arrays.asList(
+            "Hémoglobine A1C",
+            "Microalbumine",
+            "Taille",
+            "Poids",
+            "Fumeu(r|se)",     // Correspond à "Fumeur" ou "Fumeuse"
+            "Anormal",
+            "Cholestérol",
+            "Vertige(s)?",     // Correspond à "Vertige" ou "Vertiges"
+            "Rechute",
+            "Réaction",
+            "Anticorps"
     );
+
+    // On compile chaque motif une seule fois pour de meilleures performances.
+    // On ajoute des "word boundaries" (\b) pour ne matcher que des mots entiers.
+    // On rend la recherche insensible à la casse et compatible Unicode.
+    private static final List<Pattern> COMPILED_TRIGGERS = TRIGGER_PATTERNS.stream()
+            .map(pattern -> Pattern.compile("\\b" + pattern + "\\b", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE))
+            .collect(Collectors.toList());
 
     public ReportService(PatientServiceProxy patientProxy, NotesServiceProxy notesProxy) {
         this.patientProxy = patientProxy;
@@ -65,9 +82,12 @@ public class ReportService {
     }
 
     /**
-     * Compte le nombre de déclencheurs présents dans les notes du patient.
+     * Compte le nombre de déclencheurs uniques présents dans une liste de notes.
+     * La recherche est insensible à la casse et gère les variations (pluriel, féminin)
+     * grâce à des expressions régulières pré-compilées.
+     *
      * @param notes La liste des notes du patient.
-     * @return Le nombre de déclencheurs trouvés.
+     * @return Le nombre de concepts déclencheurs uniques trouvés.
      */
     private long countTriggersInNotes(List<NoteDTO> notes) {
         log.info("Comptage des déclencheurs dans les notes du patient");
@@ -80,11 +100,11 @@ public class ReportService {
                 .collect(Collectors.joining(" ")); // Concatène toutes les notes en une seule chaîne de caractères
 
         // On compte les occurrences uniques, insensible à la casse
-        log.info("Nombre de déclencheurs trouvés dans les notes : {}", TRIGGERS.stream()
-                .filter(trigger -> allNotesText.toLowerCase().contains(trigger.toLowerCase()))
+        log.info("Nombre de déclencheurs trouvés dans les notes : {}", COMPILED_TRIGGERS.stream()
+                .filter(pattern -> pattern.matcher(allNotesText).find())
                 .count());
-        return TRIGGERS.stream()
-                .filter(trigger -> allNotesText.toLowerCase().contains(trigger.toLowerCase()))
+        return COMPILED_TRIGGERS.stream()
+                .filter(pattern -> pattern.matcher(allNotesText).find())
                 .count();
     }
 

@@ -1,0 +1,159 @@
+version: '3.8'
+
+services:
+  # --- Bases de Données ---
+  patient-db:
+    image: mysql:8.0
+    container_name: patient-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: diabete_patient_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: strong_root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - patient-db-data:/var/lib/mysql
+      - ./db-init/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - mediscreen-net
+
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-pstrong_root_password" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  notes-db:
+    image: mongo:6.0
+    container_name: notes-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo-data:/data/db
+      - ./db-init/mongo:/docker-entrypoint-initdb.d
+    networks:
+      - mediscreen-net
+
+    # --- Microservices de l'Application ---
+  patient-service:
+    # Le contexte de build est maintenant la racine du projet ('.')
+    build:
+      context: .
+      dockerfile: patient-service/Dockerfile
+      args:
+        MODULE_NAME: patient-service
+    container_name: patient-service
+    restart: on-failure
+    depends_on:
+        patient-db:
+          condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_HOST=patient-db
+    networks:
+      - mediscreen-net
+
+
+  notes-service:
+    build:
+      context: .
+      dockerfile: notes-service/Dockerfile
+      args:
+        MODULE_NAME: notes-service
+    container_name: notes-service
+    restart: on-failure
+    depends_on:
+      notes-db:
+        condition: service_started
+    ports:
+      - "8082:8082"
+    environment:
+      - MONGO_HOST=notes-db
+      - MONGO_USER=root
+      - MONGO_PASS=password
+    networks:
+      - mediscreen-net
+
+  report-service:
+    build:
+      context: .
+      dockerfile: report-service/Dockerfile
+      args:
+        MODULE_NAME: report-service
+    container_name: report-service
+    restart: on-failure
+    depends_on:
+      - patient-service
+      - notes-service
+    ports:
+      - "8083:8083"
+    environment:
+      - PATIENT_HOST=patient-service
+      - PATIENT_PORT=8081
+      - NOTES_HOST=notes-service
+      - NOTES_PORT=8082
+    networks:
+      - mediscreen-net
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+      args:
+        MODULE_NAME: gateway-service
+    container_name: gateway-service
+    restart: on-failure
+    depends_on:
+      - patient-service
+      - notes-service
+      - report-service
+    ports:
+      - "8080:8080"
+    environment:
+      - PATIENT_HOST=patient-service
+      - PATIENT_PORT=8081
+      - NOTES_HOST=notes-service
+      - NOTES_PORT=8082
+      - REPORT_HOST=report-service
+      - REPORT_PORT=8083
+    networks:
+      - mediscreen-net
+
+  frontend-ui-service:
+    build:
+      context: .
+      dockerfile: frontend-ui-service/Dockerfile
+      args:
+        MODULE_NAME: frontend-ui-service
+    container_name: frontend-ui-service
+    restart: on-failure
+    depends_on:
+      - gateway-service
+    ports:
+      - "9000:9000"
+    environment:
+      # CRUCIAL : GATEWAY_HOST doit être le nom du service gateway.
+      - GATEWAY_HOST=gateway-service
+      # CRUCIAL : Le port est le port INTERNE du gateway, pas celui sur la machine hôte.
+      - GATEWAY_PORT=8080
+    networks:
+      - mediscreen-net
+    # ...
+
+# Définition des volumes nommés pour la persistance des données
+volumes:
+  patient-db-data:
+  mongo-data:
+
+# Définition du réseau commun qui permet aux conteneurs de communiquer par leur nom
+networks:
+  mediscreen-net:
+    driver: bridge

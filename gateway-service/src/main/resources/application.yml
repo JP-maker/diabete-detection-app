@@ -2,41 +2,21 @@
 server:
   port: 8080
 
-# Nom de l'application, utile pour l'identification.
 spring:
-  application:
-    name: gateway-service
-
-  # Configuration spécifique à Spring Cloud Gateway
   cloud:
     gateway:
-      # Liste des routes à configurer. Chaque élément de la liste est une règle de routage.
       routes:
-        # --- Règle de routage pour le service PATIENT ---
-        - id: patient-service-route   # Un nom unique et descriptif pour cette règle.
-
-          # La destination : l'adresse interne du microservice vers lequel rediriger.
-          # Pour le moment, en local, on utilise localhost avec le port du service.
-          # Plus tard, avec Docker, ce sera le nom du service Docker (ex: http://patient-service:8081).
-          uri: http://localhost:8081
-
-          # Les conditions (prédicats) : quand cette règle doit-elle s'appliquer ?
+        - id: patient-service-route
+          uri: http://${PATIENT_HOST:localhost}:${PATIENT_PORT:8081}
           predicates:
-            # La règle s'applique si le chemin de l'URL de la requête commence par /patients.
-            # Le `**` est un joker qui signifie "et tout ce qui suit".
-            # Exemples de requêtes qui matcheront :
-            # /patients
-            # /patients/1
-            # /patients/search?name=Test
             - Path=/patients/**
 
         - id: notes-service-route
-          uri: http://localhost:8082 # Pointeur vers le port du nouveau service
+          uri: http://${NOTES_HOST:localhost}:${NOTES_PORT:8082}
           predicates:
-            - Path=/notes/** # Toutes les requêtes /notes/... seront redirigées
+            - Path=/notes/**
 
-          # ... routes patient-service et notes-service
         - id: report-service-route
-          uri: http://localhost:8083
+          uri: http://${REPORT_HOST:localhost}:${REPORT_PORT:8083}
           predicates:
             - Path=/report/**
